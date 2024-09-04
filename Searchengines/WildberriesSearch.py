@@ -11,11 +11,25 @@ from selenium.webdriver.common.by import By
 import os
 import pandas as pd
 import re
+import uuid
 def WildberriesSearch(e, path, lock, X, Y, positions):
+    custom_dir = f"driver"
+    unique_id = str(uuid.uuid4())
+    # Создаем директорию, если она не существует
+    os.makedirs(custom_dir, exist_ok=True)
+
+    # Создаем патчер с указанием пользовательского пути для сохранения chromedriver
+    patcher = uc.Patcher(executable_path=os.path.join(custom_dir, 'chromedriver.exe'))
+    patcher.auto()  # Автоматическая настройка патчера
+
+    # Опции для Chrome
     options = webdriver.ChromeOptions()
-    driver = uc.Chrome(options=options)
-    driver.set_window_size(X, Y)
-    driver.set_window_position(*positions, windowHandle='current')
+    # Используем уникальные пользовательские данные и профиль для каждого процесса
+    options.add_argument(f"--user-data-dir=C:/Users/User/AppData/Local/Google/Chrome/User Data/{unique_id}")
+    options.add_argument(f'--profile-directory=Profile_{unique_id}')
+
+    # Создание экземпляра Chrome с патчером
+    driver = uc.Chrome(options=options, patcher=patcher, driver_executable_path=fr"C:\Users\user\PycharmProjects\WildberriesFind\driver\chromedriver.exe")
     file_path = path.split("_")[0]
     file_path = rf'{file_path}_{e + 1}.xlsx'
     lock.release()
